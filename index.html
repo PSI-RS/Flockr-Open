@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Flockr (Static Version)</title>
+<style>
+body {
+  font-family: sans-serif;
+}.chirp {
+  border: 1px solid #ccc;
+  margin-bottom: 10px;
+  padding: 10px;
+}
+#new-chirp-form {
+  margin-top: 20px;
+}
+</style>
+</head>
+<body>
+
+<h1>Flockr (Static Demo)</h1>
+
+<div id="chirp-feed">
+  <div class="chirp">
+    <strong>Percy (Trafalgar Square):</strong> Found a shiny button!
+  </div>
+  <div class="chirp">
+    <strong>Penelope (Hyde Park):</strong> Best nesting spot is near the big oak tree.
+  </div>
+  <div class="chirp">
+    <strong>Pip (Trafalgar Square):</strong> Sharing some delicious seeds!
+  </div>
+</div>
+
+<div id="new-chirp-form">
+  <h2>New Chirp</h2>
+  <form id="add-chirp-form">
+    <label for="pigeon-name">Your Name:</label><br>
+    <input type="text" id="pigeon-name" name="pigeon-name"><br><br>
+    <label for="location">Location:</label><br>
+    <input type="text" id="location" name="location"><br><br>
+    <label for="message">Message:</label><br>
+    <textarea id="message" name="message"></textarea><br><br>
+    <button type="button" onclick="addChirp()">Add Chirp</button>
+  </form>
+</div>
+
+<script>
+function addChirp() {
+  const pigeonName = document.getElementById("pigeon-name").value;
+  const location = document.getElementById("location").value;
+  const message = document.getElementById("message").value;
+
+  if (pigeonName.trim() === "" || location.trim() === "" || message.trim() === "") {
+    alert("Please fill in all fields.");
+    return;
+  }
+
+  const chirpFeed = document.getElementById("chirp-feed");
+  const newChirp = document.createElement("div");
+  newChirp.className = "chirp";
+  newChirp.innerHTML = `<strong>${pigeonName} (${location}):</strong> ${message}`;
+  chirpFeed.appendChild(newChirp);
+
+  // Clear the form (optional)
+  document.getElementById("add-chirp-form").reset();
+}
+</script>
+
+</body>
+</html>
