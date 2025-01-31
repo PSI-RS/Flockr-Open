@@ -1,17 +1,101 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Flockr (Static Version)</title>
+<title>Flockr (Static Demo with Likes)</title>
 <style>
 body {
   font-family: sans-serif;
-}.chirp {
-  border: 1px solid #ccc;
-  margin-bottom: 10px;
-  padding: 10px;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
+
+h1 {
+  text-align: center;
+  background-color: #007bff;
+  color: white;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+#chirp-feed {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.chirp {
+  border: 1px solid #ddd;
+  margin-bottom: 15px;
+  padding: 15px;
+  background-color: white;
+  border-radius: 5px;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+  display: flex; /* Use flexbox for layout */
+  align-items: flex-start; /* Align items to the top */
+}
+
+.chirp strong {
+  color: #333;
+  margin-right: 10px; /* Space between name and message */
+}
+
+.chirp .like-button {
+  margin-top: 5px;
+  cursor: pointer;
+  color: #888;
+  margin-left: auto; /* Push like button to the right */
+}
+
+.chirp .like-button.liked {
+  color: #007bff;
+}
+
 #new-chirp-form {
+  padding: 20px;
+  background-color: white;
+  border-top: 1px solid #ddd;
   margin-top: 20px;
+}
+
+#new-chirp-form label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+#new-chirp-form input[type="text"],
+#new-chirp-form textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+#new-chirp-form button {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#new-chirp-form button:hover {
+  background-color: #0056b3;
+}
+.chirp .like-button {
+  margin-top: 5px;
+  cursor: pointer;
+  color: #888; /* Gray initially */
+}
+
+.chirp .like-button.liked {
+  color: #007bff; /* Blue when liked */
 }
 </style>
 </head>
@@ -20,31 +104,31 @@ body {
 <h1>Flockr (Static Demo)</h1>
 
 <div id="chirp-feed">
-  <div class="chirp">
-    <strong>Percy (Trafalgar Square):</strong> Found a shiny button!
-  </div>
-  <div class="chirp">
-    <strong>Penelope (Hyde Park):</strong> Best nesting spot is near the big oak tree.
-  </div>
-  <div class="chirp">
-    <strong>Pip (Trafalgar Square):</strong> Sharing some delicious seeds!
-  </div>
-</div>
-
+</div>  </div>
 <div id="new-chirp-form">
   <h2>New Chirp</h2>
   <form id="add-chirp-form">
     <label for="pigeon-name">Your Name:</label><br>
-    <input type="text" id="pigeon-name" name="pigeon-name"><br><br>
+    <input type="text" id="pigeon-name" name="pigeon-name" required><br><br>
     <label for="location">Location:</label><br>
-    <input type="text" id="location" name="location"><br><br>
+    <input type="text" id="location" name="location" required><br><br>
     <label for="message">Message:</label><br>
-    <textarea id="message" name="message"></textarea><br><br>
+    <textarea id="message" name="message" required></textarea><br><br>
     <button type="button" onclick="addChirp()">Add Chirp</button>
   </form>
 </div>
 
 <script>
+const chirpFeed = document.getElementById("chirp-feed");
+
+window.addEventListener('DOMContentLoaded', () => {
+  const storedChirps = localStorage.getItem('chirps');
+  if (storedChirps) {
+    chirpFeed.innerHTML = storedChirps;
+    attachLikeListeners(); // Attach listeners *after* setting innerHTML
+  }
+});
+
 function addChirp() {
   const pigeonName = document.getElementById("pigeon-name").value;
   const location = document.getElementById("location").value;
@@ -55,14 +139,47 @@ function addChirp() {
     return;
   }
 
-  const chirpFeed = document.getElementById("chirp-feed");
   const newChirp = document.createElement("div");
   newChirp.className = "chirp";
-  newChirp.innerHTML = `<strong>${pigeonName} (${location}):</strong> ${message}`;
-  chirpFeed.appendChild(newChirp);
 
-  // Clear the form (optional)
+  // Construct the chirp content *separately*
+  const chirpContent = document.createElement("span"); // Use a span for the text
+  chirpContent.innerHTML = `<strong>${pigeonName} (${location}):</strong> ${message}`;
+  newChirp.appendChild(chirpContent);
+
+  const likeButton = document.createElement("span");
+  likeButton.className = "like-button";
+  likeButton.textContent = "Like";
+  likeButton.addEventListener("click", toggleLike);
+  newChirp.appendChild(likeButton);
+
+
+  chirpFeed.insertBefore(newChirp, chirpFeed.firstChild);
+
+  localStorage.setItem('chirps', chirpFeed.innerHTML);
+  attachLikeListeners(); // Attach listeners *after* setting innerHTML
   document.getElementById("add-chirp-form").reset();
+}
+
+function attachLikeListeners() {
+  const likeButtons = document.querySelectorAll('.like-button');
+  likeButtons.forEach(button => {
+    button.removeEventListener('click', toggleLike); // Important: Remove old listeners
+    button.addEventListener('click', toggleLike);    // Then add new ones
+  });
+}
+
+function toggleLike(event) {
+  const likeButton = event.target;
+  likeButton.classList.toggle("liked");
+
+  if (likeButton.classList.contains("liked")) {
+    likeButton.textContent = "Liked";
+  } else {
+    likeButton.textContent = "Like";
+  }
+
+  localStorage.setItem('chirps', chirpFeed.innerHTML);
 }
 </script>
 
